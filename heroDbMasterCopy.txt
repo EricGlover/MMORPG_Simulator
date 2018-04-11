@@ -1,0 +1,69 @@
+Heroes in database : 4
+0
+Dagger
+Rogue
+health:	100
+armor	21
+attack	122
+crit	-83
+intelligence	42
+survival	2
+greed	60
+party love	70
+reproduction stats	0
+			0
+			0
+			0
+			0	
+////////////////////////////////////////////////////////////////////////////
+0
+Fred
+Knight
+health:	100
+armor	21
+attack	122
+crit	-83
+intelligence	42
+survival	2
+greed	60
+party love	70
+reproduction stats	0
+			0
+			0
+			0
+			0
+////////////////////////////////////////////////////////////////////////////
+0
+George
+Gnome
+health:	100
+armor	0
+attack	122
+crit	-83
+intelligence	42
+survival	2
+greed	60
+party love	70
+reproduction stats	0
+			0
+			0
+			0
+			0
+////////////////////////////////////////////////////////////////////////////
+0
+Sona
+Dance Mage
+health: 35
+armor: 	1
+attack: 3
+crit: 1
+intelligence 68
+survival   50
+greed      20
+party love   70
+reproduction stats	0
+			0
+			0
+			0
+			0
+////////////////////////////////////////////////////////////////////////////

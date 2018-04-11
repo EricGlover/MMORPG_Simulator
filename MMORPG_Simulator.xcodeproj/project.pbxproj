@@ -7,7 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7C24FD961E3145B2007352CA /* ui.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C24FD941E3145B2007352CA /* ui.c */; };
+		7C91035B1E47E6BF0053FA18 /* ai.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C9103591E47E6BF0053FA18 /* ai.c */; };
+		7CB14BE11E30016500C49FC3 /* SDL2_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CB14BE01E30016500C49FC3 /* SDL2_image.framework */; };
+		7CBA75371E3014BD002CFF37 /* SDL2_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CBA75361E3014BD002CFF37 /* SDL2_ttf.framework */; };
+		7CBDA73B1E36BA1A003710B5 /* database.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CBDA7391E36BA1A003710B5 /* database.c */; };
 		7CEAA51C1E2F151100E969C4 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CEAA51B1E2F151100E969C4 /* main.c */; };
+		7CEAA5241E2F152A00E969C4 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CEAA5231E2F152A00E969C4 /* SDL2.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +29,19 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7C24FD941E3145B2007352CA /* ui.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ui.c; sourceTree = "<group>"; };
+		7C24FD951E3145B2007352CA /* ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ui.h; sourceTree = "<group>"; };
+		7C9103591E47E6BF0053FA18 /* ai.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ai.c; path = ../ai.c; sourceTree = "<group>"; };
+		7C91035A1E47E6BF0053FA18 /* ai.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ai.h; path = ../ai.h; sourceTree = "<group>"; };
+		7CB14BE01E30016500C49FC3 /* SDL2_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_image.framework; path = ../../../../../../Library/Frameworks/SDL2_image.framework; sourceTree = "<group>"; };
+		7CBA75361E3014BD002CFF37 /* SDL2_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_ttf.framework; path = ../../../../../../Library/Frameworks/SDL2_ttf.framework; sourceTree = "<group>"; };
+		7CBDA7391E36BA1A003710B5 /* database.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = database.c; sourceTree = "<group>"; };
+		7CBDA73A1E36BA1A003710B5 /* database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = database.h; sourceTree = "<group>"; };
 		7CEAA5181E2F151100E969C4 /* MMORPG_Simulator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MMORPG_Simulator; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CEAA51B1E2F151100E969C4 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		7CEAA5231E2F152A00E969C4 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../../../../../../Library/Frameworks/SDL2.framework; sourceTree = "<group>"; };
+		7CEAA5251E2F158F00E969C4 /* game.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = game.h; sourceTree = "<group>"; };
+		7CEAA5261E2F17AF00E969C4 /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +49,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7CBA75371E3014BD002CFF37 /* SDL2_ttf.framework in Frameworks */,
+				7CB14BE11E30016500C49FC3 /* SDL2_image.framework in Frameworks */,
+				7CEAA5241E2F152A00E969C4 /* SDL2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,6 +63,7 @@
 			children = (
 				7CEAA51A1E2F151100E969C4 /* MMORPG_Simulator */,
 				7CEAA5191E2F151100E969C4 /* Products */,
+				7CEAA5221E2F152A00E969C4 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -57,9 +78,27 @@
 		7CEAA51A1E2F151100E969C4 /* MMORPG_Simulator */ = {
 			isa = PBXGroup;
 			children = (
+				7C9103591E47E6BF0053FA18 /* ai.c */,
+				7C91035A1E47E6BF0053FA18 /* ai.h */,
+				7CBDA7391E36BA1A003710B5 /* database.c */,
+				7CBDA73A1E36BA1A003710B5 /* database.h */,
 				7CEAA51B1E2F151100E969C4 /* main.c */,
+				7C24FD941E3145B2007352CA /* ui.c */,
+				7C24FD951E3145B2007352CA /* ui.h */,
+				7CEAA5261E2F17AF00E969C4 /* main.h */,
+				7CEAA5251E2F158F00E969C4 /* game.h */,
 			);
 			path = MMORPG_Simulator;
+			sourceTree = "<group>";
+		};
+		7CEAA5221E2F152A00E969C4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7CBA75361E3014BD002CFF37 /* SDL2_ttf.framework */,
+				7CB14BE01E30016500C49FC3 /* SDL2_image.framework */,
+				7CEAA5231E2F152A00E969C4 /* SDL2.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -120,6 +159,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				7CEAA51C1E2F151100E969C4 /* main.c in Sources */,
+				7C24FD961E3145B2007352CA /* ui.c in Sources */,
+				7CBDA73B1E36BA1A003710B5 /* database.c in Sources */,
+				7C91035B1E47E6BF0053FA18 /* ai.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,6 +258,10 @@
 		7CEAA5201E2F151100E969C4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -223,6 +269,10 @@
 		7CEAA5211E2F151100E969C4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -246,6 +296,7 @@
 				7CEAA5211E2F151100E969C4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

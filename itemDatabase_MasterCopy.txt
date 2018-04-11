@@ -1,0 +1,54 @@
+0
+Wand of Forgetfulness
+Stick
+health: 	0
+armor: 		0
+attack:		5
+crit:		-1
+intelligence	20
+survival	11
+greed		11
+party love:	11
+street trash
+value		2
+shinniness	0
+durability	10
+drop chance	12
+visible		1
+//////////////////////////////////////////////////////
+0
+Dagger of Dubious Nature
+Stick
+health: 	0
+armor: 		0
+attack:		8
+crit:		3
+intelligence	-1
+survival	1
+greed		1
+party love:	1
+street trash
+value		9
+shinniness	2
+durability	33
+drop chance	14
+visible		1
+//////////////////////////////////////////////////////
+0
+Stick of Destiny
+Stick
+health: 	0
+armor: 		0
+attack:		5
+crit:		-1
+intelligence	20
+survival	11
+greed		11
+party love:	11
+street trash
+value		2
+shinniness	0
+durability	10
+drop chance	12
+visible		1
+//////////////////////////////////////////////////////

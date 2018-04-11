@@ -1,0 +1,68 @@
+1
+Dagger
+Rogue
+health:	80
+armor	2
+attack	12
+crit	-8
+intelligence	22
+survival	78
+greed	88
+party love	20
+reproduction stats	0
+			0
+			0
+			0
+			0	
+////////////////////////////////////////////////////////////////////////////
+1
+Fred
+Knight
+health:	100
+armor	4
+attack	13
+crit	-83
+intelligence	27
+survival	32
+greed	1
+party love	67
+reproduction stats	0
+			0
+			0
+			0
+			0
+////////////////////////////////////////////////////////////////////////////
+1
+George
+Gnome
+health:	32
+armor	1
+attack	7
+crit	23
+intelligence	60
+survival	23
+greed	10
+party love	10
+reproduction stats	0
+			0
+			0
+			0
+			0
+////////////////////////////////////////////////////////////////////////////
+1
+Sona
+Dance Mage
+health: 35
+armor: 	1
+attack: 3
+crit: 1
+intelligence 68
+survival   50
+greed      20
+party love   70
+reproduction stats	0
+			0
+			0
+			0
+			0
+////////////////////////////////////////////////////////////////////////////

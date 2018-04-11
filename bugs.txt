@@ -1,0 +1,185 @@
+//*************** An example of Debugging Memory Problems In C ***********//////
+
+//the dubious output:::
+
+Dagger of Dubious Nature --> NULL
+Dagger of Dubious Nature --> Dagger of Dubious Nature --> NULL
+Dagger of Dubious Nature --> Dagger of Dubious Nature --> Dagger of Dubious Nature --> NULL
+Dagger of Dubious Nature --> Dagger of Dubious Nature --> NULL
+Dagger of Dubious Nature --> Dagger of Dubious Nature --> Dagger of Dubious Nature --> NULL
+Dagger of Dubious Nature --> Dagger of Dubious Nature --> NULL
+////********** BUG HERE ***************////////////////
+MMORPG_Simulator(28142,0x100255000) malloc: *** error for object 0x1004445e0: pointer being freed was not allocated
+*** set a breakpoint in malloc_error_break to debug
+
+////*************	THE PROBLEM LINE	***********//////
+free(current->data);		<————signal SIGABRT
+
+
+//*************** the function with the sigabrt  ***********//////
+int deleteZZZ(Node **topEntity, void *entity){
+    if (*topEntity == NULL) {
+        puts("Error, the linked list is already empty");
+        return 0;
+    }else if (*entity == NULL){
+        puts("Error, the entity can't be deleted because it's NULL");
+    }
+    Node *top = *topEntity;
+    Node *current = top;
+    Node *previous = NULL;
+    while (current->data != entity ) {
+        previous = current;
+        current = current->next;
+        if(current == NULL) {
+            puts("Couldn't delete entity from the linked list because it's not in the list");
+            return 0;
+        }
+    }
+    //in case the first thing in the list is being deleted, don't attempt to access a NULL ptr
+    if (previous == NULL) {
+        *topEntity = current->next;    //either null or actual heroNode
+        top = NULL;     //testing
+    }else{
+        previous->next = current->next;
+    }
+    //free up the space and make sure nothing is pointing to there any more...
+    //otherwise you can corrupt your heap...which is the sad times.
+    free(current->data);		<————signal SIGABRT
+    free(current);
+    entity = NULL;
+    current = NULL; //testing
+    
+    return 1;
+}
+
+///************* THE CALLING FUNCTION *****************/////////
+    Item *wand = (Item*) createItem(ITEM);
+    wand->loaded = 1;   //manually set to 1 in db while testing
+    Item *dagger = (Item *) createItem(ITEM);
+    dagger->loaded = 1;
+    Item *stick = (Item *) createItem(ITEM);
+    stick->loaded = 1;
+    
+    insertZZZ(&topI, wand);
+    printListZZZ(&topI, ITEM);
+    insertZZZ(&topI, dagger);
+    printListZZZ(&topI, ITEM);
+    insertZZZ(&topI, stick );
+    printListZZZ(&topI, ITEM);
+    
+    deleteZZZ(&topI, (void *) wand);	<————the actual problem
+    printListZZZ(&topI, ITEM);
+    insertZZZ(&topI, wand);
+    printListZZZ(&topI, ITEM);
+    deleteZZZ(&topI, (void *) stick);
+    printListZZZ(&topI, ITEM);
+    deleteZZZ(&topI, (void *) wand); <—————— signal SIGABRT 
+    printListZZZ(&topI, ITEM);
+    deleteZZZ(&topI, (void *) dagger);
+    printListZZZ(&topI, ITEM);
+
+
+///earlier I called delete on the item wand but then I never malloc’d space for it
+//after that, in fact Wand still pointed to the malloc’d space, and I even used it
+//to later insert into the linked list
+//only when I try to free the space in the delete call do I notice that I shouldn’t 
+//even have access to that space now
+
+//Solution
+
+int deleteZZZ(Node **topEntity, void **entity){
+    if (*topEntity == NULL) {
+        puts("Error, the linked list is already empty");
+        return 0;
+    }else if (*entity == NULL){
+        puts("Error, the entity can't be deleted because it's NULL");
+    }
+    Node *top = *topEntity;
+    Node *current = top;
+    Node *previous = NULL;
+    while (current->data != *entity ) {
+        previous = current;
+        current = current->next;
+        if(current == NULL) {
+            puts("Couldn't delete entity from the linked list because it's not in the list");
+            return 0;
+        }
+    }
+    //in case the first thing in the list is being deleted, don't attempt to access a NULL ptr
+    if (previous == NULL) {
+        *topEntity = current->next;    //either null or actual heroNode
+        top = NULL;     //testing
+    }else{
+        previous->next = current->next;
+    }
+    //free up the space and make sure nothing is pointing to there any more...
+    //otherwise you can corrupt your heap...which is the sad times.
+    free(current->data);		<————signal SIGABRT
+    free(current);
+    *entity = NULL;	//?
+    current = NULL; //testing
+    
+    return 1;
+}
+
+
+
+0x7fff5fbff518		deleteZZZ’s entity ptr address
+0x7fff5fbff598		testDatabase’s wand ptr address
+	//the function call
+deleteZZZ(&topI, (void *) wand);
+
+
+
+
+PRINTING WHAT UPDATE_HERO_DB IS WRITING TO THE DATABASE...
+1
+Dagger
+Rogue
+health:	100
+armor	21
+attack	122
+crit	-83
+intelligence	42
+survival	2
+greed	60
+party love	70
+////////////////////////////////////////////////////////////////////////////
+1
+Fred
+Knight
+health:	100
+armor	21
+attack	122
+crit	-83
+intelligence	42
+intelligence	42survival	2
+greed	60
+party love	70
+////////////////////////////////////////////////////////////////////////////
+0
+George
+Gnome
+health:	100
+armor	0
+attack	122
+crit	-83
+intelligence	42
+survival	2
+greed	60
+party love	70
+////////////////////////////////////////////////////////////////////////////
+0
+Sona
+Dance Mage
+health: 35
+armor: 	1
+attack: 3
+crit: 1
+intelligence 68
+survival   50
+greed      20
+party love   70
+//////////////////////////////
+
+

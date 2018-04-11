@@ -1,0 +1,861 @@
+//
+//  database.c
+//  MMORPG_Simulator
+//
+//  Created by Eric Glover on 1/23/17.
+//  Copyright © 2017 Glover Corp. All rights reserved.
+//
+
+#include "database.h"
+
+#define TRUE    1
+#define FALSE   0
+
+//TO-DO :
+    //resetHeroDb is broke af, still broke af
+    //UPDATE ALL CODE TO USE HERO LINKED LISTS, SPECIFICALLY CREATE() AND UPDATEHERODB()
+        //i believe it's updated but now something is buggy, probably due to the updates....
+    //figure the entityPtrList dilemma,->?
+    //do the stuff it says to do in database.h
+    //test updateHeroes()
+    //look into refactoring all this database code so it can be better reused in the monster / item / etc database equivalent functions
+    //set it up so that you can declare heroes from the database??? is this a good idea?
+
+//heroList helper functions complete, somewhat
+
+
+//entity databases
+FILE *heroDb;
+FILE *monsterDb;
+FILE *itemDb;
+Hero *heroList[10];     //set these pointers to null manually, this doesn't seem to be guaranteed otherwise
+
+//node functions
+void insert(Hero *hero);
+int delete(Hero *hero);
+int isEmpty(void);
+void printHeroList(void);
+
+int readKey(char *mode, FILE *, ... );
+    //calls readKey("read only", FILE *);
+    //readKey("read and write", FILE *, FILE *);
+
+//entity database names
+char *hDbName = "heroDatabase.txt";
+char *mDbName = "monsterDatabase.txt";
+char *iDbName = "itemDatabase.txt";
+
+//entity Lists
+HeroNode *topHero = NULL;
+
+
+//necessary database format for this to work : one line per attribute, the only numbers in the database are the values of the hero, there must be a \t or whitespace separating the numbers from the words, a blank line between entries, for attributes that are strings have only the attribute value in that line, for the moment no junk text inbetween entries is allowed (do to updateHeroDb() and probably createHero() ), also no junk text at the top of the database...
+//createHero reads the values of the first unloaded hero from the database into a newly made hero struc and returns a pointer to it
+
+void testDatabase(void){
+    /*printf("isEmpty() == %d\n", isEmpty());
+    printHeroList();
+    Hero *knight = malloc(sizeof(Hero));
+    insert(knight);
+    printf("isEmpty() == %d\n", isEmpty());
+    printHeroList();
+    delete(knight);
+    printHeroList();
+     */
+    /*
+    Hero *wizard = malloc(sizeof(Hero));
+    strcpy(wizard->name, "Wizard");
+    Hero *rogue = malloc(sizeof(Hero));
+    strcpy(rogue->name, "Rogue");
+    Hero *sona = malloc(sizeof(Hero));
+    strcpy(sona->name, "Sona");
+    insert(wizard);
+    insert(rogue);
+    printHeroList();
+    insert(sona);
+    printHeroList();
+    */
+    
+    Hero *rogue = createHero();       //TESTING , REMEMBER TO CHANGE DATABASE ENTRY MANAULLY TO LOADED = 1 ON ROGUE AND KNIGHT
+    Hero *knight = createHero();
+    Hero *gnome = createHero();
+    
+    printHero(getHeroI(0));
+    printHero(getHeroI(1));
+    printHero(knight);
+    printHero(getHeroI(2));
+    
+    resetHeroDb();
+    
+    
+    /*
+    delete(rogue);
+    printHeroList();
+    
+    delete(wizard);
+    printHeroList();
+    
+    delete(sona);
+    printHeroList();
+    
+    delete(sona);
+    printHeroList();
+     */
+    
+    
+}
+
+
+//finds the first unloaded hero in the heroDb, converts the database entry to a hero and returns it
+//
+Hero * createHero(){
+    int loaded = 0, lineNum = 0, data = 0;  //
+    char line[100];
+    char *token;
+    int stat = 0, desire = 0;   //iterators
+    //memcpy(line, 'z', 100);
+    memset(line, 'z', 100);     //init line cause why not
+    
+    //printf("Size of heroList[10] == %lu\n", sizeof(heroList));
+    
+    //open hero db
+    if ( (heroDb = fopen(hDbName, "r") ) == NULL ) {            //if file open fails
+        puts("Error in loading heroDb...exiting and returning a blank hero");
+        Hero *hero = malloc(sizeof(Hero));
+        return hero;
+    }
+    if(DATABASE_KEY){
+        readKey("read only", heroDb);
+     }
+    
+    Hero *hero = malloc(sizeof(Hero));
+    
+    while ( (fgets(line , 100, heroDb) ) != NULL ){                                     //beginning of the read loop
+        
+        
+        //printf("%s", line);
+        line[strlen(line) - 1] = '\0';              //write over the newline character with a null terminator
+        //convert loaded to an int
+        //loaded = atoi(line);
+        token = strtok(line, " \t");
+        while (! (loaded = atoi(token)) ){          //atoi ("words") returns 0, condition fails when you find a number
+            if( !strcmp(token, "0") ) {                //atoi(token) will return 0 if the int is 0, so we check this first
+                break;                              //if true, we've found a 0 int so break outta here
+            }
+            token = strtok(NULL, " \t");
+        }
+        if (loaded == TRUE) {
+            //skip over to the next hero datafile
+            for (int i = 0; i < LINES_PER_HERO_ENTRY; i++) {        //tried + 2, also doesn't seem to work
+                fgets(line, 100, heroDb);       //move the file pointer to the next entry
+            }
+        }else{
+            //found an unloaded hero, read it from file
+            while ( (fgets(line, 100, heroDb) ) != NULL) {
+                //attempt 2, this one should work with the old hero structs
+                //printf("%s", line);
+                line[strlen(line) - 1] = '\0';              //write over the newline character with a null terminator
+                if(lineNum == 0){
+                    strcpy(hero->name, line);
+                }else if (lineNum == 1) {
+                    strcpy(hero->h_class, line);
+                }else if (lineNum <= STAT_NUM + 1){
+                    //this should be the int array stats part of the file
+                    //strcpy(token, strtok(line, " \t") );  //necessary?, yeah, can't assign a char [] with a pointer
+                    token = strtok(line, " \t");
+                    while (! (data = atoi(token)) ){          //atoi ("words") returns 0, condition fails when you find a number
+                        if( ! strcmp(token, "0")) {     //without this values of 0 break the loop
+                            break;
+                        }
+                        token = strtok(NULL, " \t");
+                    }
+                    hero->stats[stat] = data;
+                    stat++;
+                }else if (lineNum <= STAT_NUM + 1 + DESIRES_NUM){
+                    //this should be the int array desires part of the file
+                    /*                    strcpy(token, strtok(line, " ") );  //necessary?, yeah, can't assign a char [] with a pointer
+                     while (! (data = atoi(token)) ){          //atoi ("words") returns 0, condition fails when you find a number
+                     strtok(NULL, " ");
+                     }*/
+                    token = strtok(line, " \t");
+                    while (! (data = atoi(token)) ){          //atoi ("words") returns 0, condition fails when you find a number
+                        if( ! strcmp(token, "0")) {
+                            break;
+                        }
+                        token = strtok(NULL, " \t");
+                    }
+                    
+                    hero->desires[desire] = data;
+                    desire++;
+                }
+                lineNum++;
+            }
+        }
+    }   //end of the read database loop
+    /*
+    //find first unpopulated index in the heroList array and set it's pointer to this new Hero
+    int listLength = (int) (sizeof(heroList) / sizeof(Hero *));         //find the size of the HeroList array
+    for (int i = 0; i < listLength; i++) {
+        if (heroList[i] == NULL){
+            heroList[i] = hero;
+            //change the value in the database to loaded = 1
+            heroList[i]->loaded = 1;
+            break;
+        }else if (i == listLength - 1){
+            puts("heroList is full, can't add new Hero to it");
+        }
+    }
+     */
+    
+    /*TESTING*/
+    insert(hero);
+    hero->loaded = 1;
+    
+    //close all file pointers before calling this
+    fclose(heroDb);
+    updateHeroDb();
+    
+    return hero;
+}
+
+//run through the heroList and use it to rewrite the database
+//later try and rewrite the code to allow for code reuse when you do the updateMonsterDb() and updateItemDb()
+//potential error but I'm ignoring it - let it be known that the program may overwrite the database
+//for the moment no junk text inbetween entries is allowed
+void updateHeroDb(void) {
+    FILE *heroDb = NULL;
+    FILE *temp = NULL;
+    int loaded = 0, lineNum = 0, data = 0, i = 0, heroesInDatabase = 0;
+    char line[100];
+    memset(line, '\0', 100);
+    char *token;
+    int stat = 0, desire = 0;   //iterators
+    Hero *hero = NULL;
+    
+    //open the database
+    if ( (heroDb = fopen(hDbName, "r") ) == NULL ) {            //if file open fails
+        puts("Error in loading heroDb...exiting, sorry couldn't update it");
+    }
+    //open tmp file to write into
+    if ( (temp = fopen("temp.txt", "w") ) == NULL) {
+        puts("Error in opening the temp file...not handling the error");
+    }
+    
+    if(DATABASE_KEY){
+        heroesInDatabase = readKey("read and write", heroDb, temp);
+    }
+    
+    //how's this working? for each hero read through the database and write the updated entry into tmp.txt (with \n 's)
+    //then write the rest of the database into tmp.txt as it is
+    //then close out the database file pointer, open it again with write privledges (that should create a fresh page)
+    //read tmp.txt into the newly made blank database, then close tmp.txt and database
+    
+    
+    //run through heroList
+    if ( (hero = getHeroI(i)) != NULL){     //really isn't much reason for this if to wrap the whole loop, the next hero is grabbed at the end of the
+            //while loop that loops through the file
+        //rewrite the database entry with this heroes values
+        
+        //find loaded == 1, print an error if the database and the heroList are out of sync (extra hero in list, or extra loaded == 1 hero in
+        //database not found in heroList
+        //do I need to check heroList[i]->loaded ?
+        //in general how do I know if this hero just slipped into the list vs if I just created it, could pass the hero * ?
+        //potential error but I'm ignoring it - let it be known that the program may overwrite the database
+        
+        while ( (fgets(line, 100, heroDb)) != NULL) {       //loop through database to find values
+            printf("%s", line);
+            line[strlen(line) - 1] = '\0'; //write over the newline character with a null terminator, and write it in later so it doesn't fuck up strtok
+            //convert loaded to an int
+            //loaded = atoi(line);
+            /*if (loaded == 1){
+             
+             }else{
+             //puts("Error, database and heroList unsynced. Found a hero in list not set to loaded in database");
+             //actually this will happen, just set it to loaded
+             
+             }*/
+            
+            
+            //database format is : line 1 loaded, L2 name, L3 class, L4 -> L4 + number of stats stats, L4 + number of stats -> last line desires
+            //then blank line
+            if ( (lineNum % LINES_PER_HERO_ENTRY) == 0){
+                //line 'loaded'
+                //write 1 regardless but save all the other text????
+                //token through
+                //reset all the iterators used later, including lineNum
+                stat = desire = lineNum = 0;
+                token = strtok(line, " \t");    //first token
+                do {
+                    if ( !strcmp(token, "0") ) {        //atoi(token) will return 0 if the int is 0, so we check this first
+                        fprintf(temp, "1");
+                    }else if( atoi(token)) {            //if a number is found it's the value of loaded, write 1 regardless, b/c this loop only runs when we have a loaded hero on the code side
+                        fprintf(temp, "%s", "1");
+                    }else {
+                        fprintf(temp, "%s", token);     //otherwise it's other text so we just copy it over to temp
+                    }
+                } while ( (token = strtok(NULL, " \t")) != NULL);
+                fprintf(temp, "\n");        //add a newline
+            }else if (lineNum == 1){
+                //line 'name'
+                fprintf(temp, "%s", hero->name);
+                fprintf(temp, "\n");        //add a newline
+            }else if (lineNum == 2){
+                //line 'class' (h_class)
+                fprintf(temp, "%s", hero->h_class);
+                fprintf(temp, "\n");        //add a newline
+            }else if (lineNum <= STAT_NUM + 2){
+                //lines for 'stats[]'
+                token = strtok(line, " \t");    //first token
+                do {
+                    if ( atoi(token) || (!strcmp(token, "0")) ){     //if it's a number we update it
+                        fprintf(temp, "\t%d", hero->stats[stat]);
+                    }else{                  //otherwise we copy it over
+                        fprintf(temp, "%s", token);
+                    }
+                    
+                } while ( (token = strtok(NULL, " \t")) != NULL);
+                fprintf(temp, "\n");        //add a newline
+                stat++;
+            }else if (lineNum <= STAT_NUM + 2 + DESIRES_NUM){
+                //lines for 'desires[]'
+                token = strtok(line, " \t");    //first token
+                do {
+                    if ( atoi(token) || (!strcmp(token, "0")) ){     //if it's a number we update it
+                        fprintf(temp, "\t%d", hero->desires[desire]);
+                    }else{                  //otherwise we copy it over
+                        fprintf(temp, "%s", token);
+                    }
+                    
+                } while ( (token = strtok(NULL, " \t")) != NULL);
+                fprintf(temp, "\n");        //add a newline
+                desire++;
+                if (lineNum == (LINES_PER_HERO_ENTRY - 1)){
+                    
+                    //NEED TO UPDATE THIS TO USE LINKED LIST
+                    //that was the attribute in a hero so grab a new one
+                    
+                        if ( (hero = getHeroI(++i)) != NULL){                  //BUGS
+                            //should take care of itself from here besides this stuff
+                            //how to deal with junk text here ?, loop through until you find a number?, can you rewind by a line?
+                            //for the moment no junk text inbetween entries is allowed
+                            //fgets the line separating entries
+                            /*fgets(line, 100, heroDb);
+                            fprintf(temp, "\n");        //add a newline
+                             */
+                            fgets(line, 100, heroDb);
+                            fprintf(temp, "%s", line);        //add a newline
+                        }else{
+                            //out of heroes go to the next part to write any other text
+                            fgets(line, 100, heroDb);
+                            fprintf(temp, "%s", line);        //add a newline
+                            break;  
+                        }
+                    
+                }
+            }
+            lineNum++;
+            //changing the loop, if it's the last line of the entry then grab a new Hero, if no more heroes then break
+        }
+        //explicitly make sure to find first null index
+        i = 0;
+        while ( (hero = getHeroI(i)) != NULL) {
+            i++;
+        }
+        
+        //change this to go through all the non-loaded hero entries and set loaded = 0
+        //remember that we're assuming that i is currently set to the first null index (heroList length -1 +1)
+        for (  ; i < heroesInDatabase; i++) {       //heroesinDatabase -1 ?
+            //set entry's loaded value to 0
+            
+            //skip the empty line between entry's       //only works if i != 0, on first run you begin at the top (at loaded)
+            if (i != 0){
+                fgets(line, 100, heroDb);
+                //fprintf(temp, "%s", line);
+                //fgets(line, 100, heroDb);
+                lineNum++;
+                //fprintf(temp, "%s", line);
+            }
+            if ( (lineNum % LINES_PER_HERO_ENTRY) == 0){
+                line[strlen(line) - 1] = '\0';
+                token = strtok(line, " \t");    //first token
+                do {
+                    if ( !strcmp(token, "0") ) {        //atoi(token) will return 0 if the int is 0, so we check this first
+                        fprintf(temp, "0");
+                    }else if( atoi(token)) {
+                        fprintf(temp, "%s", "0");
+                    }else {
+                        fprintf(temp, "%s", token);     //otherwise it's other text so we just copy it over to temp
+                    }
+                } while ( (token = strtok(NULL, " \t")) != NULL);
+                fprintf(temp, "\n");        //add a newline
+            }else{
+                puts("huston we have a problem in updateHeroDb()" );
+            }
+            lineNum++;        //here instead of later?
+            while ( (lineNum % LINES_PER_HERO_ENTRY) != 0) {
+                fgets(line, 100, heroDb);
+                fprintf(temp, "%s", line);
+                lineNum++;
+            }
+            fgets(line, 100, heroDb);
+            fprintf(temp, "%s", line);
+            
+            //lineNum++;
+        }
+        while ( (fgets(line, 100, heroDb)) != NULL) {       //write the rest of the file as is
+            fprintf(temp, "%s", line);
+        }
+    }else {
+        //when heroList[i] == NULL, the list is done so we break out of the for loop
+        //break;
+        //change this to go through all the non-loaded hero entries and set loaded = 0
+        //remember that we're assuming that i is currently set to the first null index (heroList length -1 +1)
+        for (  ; i < heroesInDatabase; i++) {       //heroesinDatabase -1 ?
+            //set entry's loaded value to 0
+            
+            //skip the empty line between entry's       //only works if i != 0, on first run you begin at the top (at loaded)
+            if (i != 0){
+                fgets(line, 100, heroDb);
+                fprintf(temp, "%s", line);
+                //fgets(line, 100, heroDb);
+                //fprintf(temp, "%s", line);
+            }
+            if ( (lineNum % LINES_PER_HERO_ENTRY) == 0){
+                line[strlen(line) - 1] = '\0';
+                token = strtok(line, " \t");    //first token
+                do {
+                    if ( !strcmp(token, "0") ) {        //atoi(token) will return 0 if the int is 0, so we check this first
+                        fprintf(temp, "0");
+                    }else if( atoi(token)) {
+                        fprintf(temp, "%s", "0");
+                    }else {
+                        fprintf(temp, "%s", token);     //otherwise it's other text so we just copy it over to temp
+                    }
+                } while ( (token = strtok(NULL, " \t")) != NULL);
+                fprintf(temp, "\n");        //add a newline
+            }else{
+                puts("huston we have a problem in updateHeroDb()" );
+            }
+            //lineNum++;        //here instead of later?
+            while ( (lineNum % LINES_PER_HERO_ENTRY) != 0) {
+                fgets(line, 100, heroDb);
+                fprintf(temp, "%s", line);
+                lineNum++;
+            }
+            
+            lineNum++;
+        }
+
+        while ( (fgets(line, 100, heroDb)) != NULL) {       //write the rest of the file as is
+            fprintf(temp, "%s", line);
+        }
+    }
+    //now the database file should be written into temp, so close both files and copy temp.txt into the new database file
+    fclose(heroDb);
+    fclose(temp);
+    heroDb = fopen(hDbName, "w");
+    temp = fopen("temp.txt", "r");
+    while ( (fgets(line, 100, temp)) != NULL ){
+        fprintf(heroDb, "%s", line);
+    }
+    //now close temp and delete it
+    fclose(temp);
+    remove("temp.txt");
+    
+    //close the database file
+    fclose(heroDb);
+}
+
+//resets all the loaded database variables to 0
+//resetHeroDb();        //currently all kinds of fucked up
+void resetHeroDb(void) {
+    int i = 0;
+    
+    //iterate through heroes and set them all to loaded = 0
+    Hero *hero = NULL;
+    while ( (hero = getHeroI(i)) != NULL) {
+        hero->loaded = 0;
+        i++;
+    }
+    
+    //then call a database update
+    updateHeroDb();
+    
+    
+    
+    /*
+    FILE *heroDb = NULL;
+    FILE *temp = NULL;
+    int lineNum = 1;  //
+    char line[100];
+    memset(line, '\0', 100);
+    char *token;
+    
+    //open the database
+    if ( (heroDb = fopen(hDbName, "r") ) == NULL ) {            //if file open fails
+        puts("Error in loading heroDb...exiting, sorry couldn't update it");
+    }
+    //open tmp file to write into
+    if ( (temp = fopen("temp.txt", "w") ) == NULL) {
+        puts("Error in opening the temp file...not handling the error");
+    }
+    
+    while ( (fgets(line, 100, heroDb)) != NULL) {       //loop through database to find values
+        printf("%s", line);
+        line[strlen(line) - 1] = '\0';
+        if ( (lineNum % LINES_PER_HERO_ENTRY) == 0){
+            //strtok through to the number then replace it with 0
+            token = strtok(line, " \t");    //first token
+            do {
+                if ( !strcmp(token, "0") ) {        //atoi(token) will return 0 if the int is 0, so we check this first
+                    fprintf(temp, "0");
+                }else if( atoi(token)) {            //if a number is found it's the value of loaded, write 0 regardless
+                    fprintf(temp, "%s", "0");
+                }else {
+                    fprintf(temp, "%s", token);     //otherwise it's other text so we just copy it over to temp
+                }
+            } while ( (token = strtok(NULL, " \t")) != NULL);
+            fprintf(temp, "\n");        //add a newline
+        }
+        lineNum++;
+    }
+    
+    fclose(heroDb);
+    fclose(temp);
+    heroDb = fopen(hDbName, "w");
+    temp = fopen("temp.txt", "r");
+    while ( (fgets(line, 100, temp)) != NULL ){
+        fprintf(heroDb, "%s", line);
+    }
+    //now close temp and delete it
+    fclose(temp);
+    remove("temp.txt");
+    
+    //close the database file
+    fclose(heroDb);
+     */
+
+    
+
+}
+
+//update the heroes to reflect the values in the database
+void updateHeroes(void){
+    //how am I managing the different entityLists??
+        //makes more sense to be in main, I think...
+            //entityLists currently reside in database.c
+        //maybe if I use some getter and setter functions defined in main to access the lists here?
+        //still, even at length ten the heroList is 80 bytes so if every time I call one of these functions it has to declare space for it and then populate it using getters....ughhhhhhh....just seems so sloppy
+            //could use a pointer linked list , indeed this will do, use a getter defined in main.h to retrieve the starting ptr
+                //probably declare some basic functions that'll be used a lot for using the linked list in database.h
+                //like getI() or something, so getters, setters, add, drop, search
+                
+    //FILE *tmp = NULL;
+    char line[100];
+    char *token = NULL;
+    int lineNum = 0, loaded = 0, loadedHeroes = 0, heroesInDatabase = 0, heroI = 0, desire = 0, stat = 0;
+    Hero *hero = NULL;
+    
+    if( (heroDb = fopen(hDbName, "r")) == NULL){
+        puts("error, problem loading the heroDB");
+    }
+    if( DATABASE_KEY ){
+        heroesInDatabase = readKey("read only", heroDb);
+    }
+    
+        //loop 1 : loop through the file
+    while ( (fgets(line, 100, heroDb)) != NULL) {
+        //load next hero from list that has loaded == 1
+        hero = getHeroI(heroI);
+        if ( (hero = getHeroI(heroI)) == NULL) {
+            //puts("error)
+            //allowing this to then create a new Hero from here is a way to allow us to dump the database heroes into the game all at once
+                //undecided if this is really useful, for now I'm setting it to a flag
+            if (!DATA_DUMP) {
+                //we're out of heroes that we're updating break out of loop 1
+                break;
+            }
+        }else{
+            loadedHeroes++;     //i think...
+        }
+        
+        readEntry:
+        //reset things
+        loaded = desire = stat = 0;
+        line[strlen(line) - 1] = '\0'; //write over the newline character with a null terminator, and write it in later so it doesn't fuck up
+        if(lineNum == 0) {
+            //LOADED
+            //if entry has loaded /= 1 then skip the entry and start at readEntry where we look at loaded again
+            token = strtok(line, " \t");
+            do {
+                //either case is what we're looking for
+                // remember we can't just atoi because it'll return 0 for int = 0 & for token = words
+                if ( !strcmp(token, "0") ){
+                    loaded = atoi(token);
+                }else if (atoi(token) ){
+                    loaded = atoi(token);
+                }
+            }while ( (token = strtok(NULL, " \t")) != NULL);
+            if (loaded == 0){
+                //execute skip code, if dataDump flag is false
+                if (DATA_DUMP) {
+                    //create a new hero....
+                }else{
+                    for (size_t i = 0; i < LINES_PER_HERO_ENTRY + 1; i++) {
+                        fgets(line, 100, heroDb);
+                    }
+                    goto readEntry;     //check this
+                }
+                
+            }else if(loaded == 1){
+                //happy times, do nothing ?
+            }
+            lineNum++;
+        }
+        
+        //loop 2: loop through a single entry sans first line (loaded)
+        while ( (fgets(line, 100, heroDb)) ) {
+            line[strlen(line) - 1] = '\0'; //write over the newline character with a null terminator, and write it in later so it doesn't fuck up
+           
+            //syntax of entries
+            if (lineNum == 1) {
+                //NAME
+                //hero->name
+                strcpy(hero->name, line);
+            }else if (lineNum == 2) {
+                //H_CLASS
+                strcpy(hero->h_class, line);
+            }else if (lineNum <= STAT_NUM + 2){
+                //STATS
+                token = strtok(line, " \t");    //first token
+                do {
+                    if ( atoi(token) || (!strcmp(token, "0")) ){     //if it's a number we use it for updating
+                        hero->stats[stat] = atoi(token);
+                    }else{                  //otherwise we skip it
+                        //do nothing
+                    }
+                    
+                } while ( (token = strtok(NULL, " \t")) != NULL);
+                stat++;
+            }else if (lineNum <= STAT_NUM + 2 + DESIRES_NUM){
+                //DESIRES
+                //lines for 'desires[]'
+                token = strtok(line, " \t");    //first token
+                do {
+                    if ( atoi(token) || (!strcmp(token, "0")) ){     //if it's a number we use it for updating
+                        hero->desires[desire] = atoi(token);
+                    }else{                  //otherwise we ignore it
+                        //do nothing
+                    }
+                    
+                } while ( (token = strtok(NULL, " \t")) != NULL);
+                desire++;
+                //find last line of entry
+                if (lineNum == (LINES_PER_HERO_ENTRY - 1)){
+                    //skip line needed?
+                    break;
+                }
+            }
+            lineNum++;
+        }
+    }
+    
+
+    //close file pointers, reopen with appropraite privledges
+    fclose(heroDb);
+}
+
+//don't give me negatives please...
+//use array index notation
+Hero *getHeroI(int ithHero){
+    Hero *hero = NULL;
+    int i = 0;
+    HeroNode *currentHero = topHero;
+    
+    if (isEmpty()) {
+        puts("error couldn't get ith Hero because there are no heroes, returning a blank");
+        return hero;
+    }
+    
+    //loop through
+    while (i != ithHero) {
+        i++;
+        currentHero = currentHero->next;
+        if (currentHero == NULL){
+            printf("%dth hero doesn't exist because there are only %d heroes\n", (ithHero + 1), i+1 );
+            return hero;
+        }
+    }
+    hero = currentHero->node;
+    return currentHero->node;
+}
+
+//add a heroNode to the heroLinked List
+void insert(Hero *hero){
+    //create a new node
+    HeroNode* new = malloc(sizeof(HeroNode));
+    
+    if(new != NULL) {
+        new->node = hero;
+        new->next = NULL;
+        
+        if (isEmpty()) {
+            topHero = new;
+            //new = NULL;   //unnecessary lines due to scope?
+            //free(new);
+        }else{
+            HeroNode *current = topHero;
+            //HeroNode *next = NULL;
+            while (current->next != NULL) {
+                current = current->next;
+            }
+            current->next = new;
+        }
+        /*
+        HeroNode* previousPtr = NULL;
+        HeroNode* currentPtr = topHero;
+        
+        //loop through list
+        while (currentPtr != NULL) {
+            previousPtr = currentPtr;
+            currentPtr = currentPtr->next;
+        }
+        //insert new node at beginning if list is empty
+        if(previousPtr == NULL) {
+            //topHero->node = hero;
+            //topHero->next = NULL; //the book does the below which is confuzzling
+            new->next = topHero;
+            topHero = new;
+            free(new);
+        }else{
+            previousPtr->next = new;
+            new->next = NULL;
+        }
+         */
+    }else{
+        puts("Wasn't enough space to create a new Hero");
+    }
+}
+
+//return 1 if success, 0 if fail
+int delete(Hero *hero){
+    if (isEmpty() ) {
+        puts("Error, the list is already empty");
+        return 0;
+    }
+    HeroNode *current = topHero;
+    HeroNode *previous = NULL;
+    while (current->node != hero) {
+        previous = current;
+        current = current->next;
+        if (current == NULL) {
+            puts("Could not delete hero from list because hero isn't in the list");
+            return 0;
+        }
+    }
+    if(previous == NULL){
+        
+        //current->next == NULL ? topHero = NULL : topHero = current->next;
+        /*if(current->next == NULL){
+            topHero = NULL;
+        }else{
+            topHero = current->next;
+        }*/
+        topHero = current->next;    //either null or actual heroNode
+        free(current);
+    }else{
+        //free(current->node);
+        previous->next = current->next;
+        //free(current->next);
+        free(current);
+    }
+    
+    return 1;
+}
+
+void printHeroList(void){
+    if (isEmpty()){
+        puts("Hero list is currently empty");
+    }else{
+        HeroNode *current = topHero;
+        while (current->next != NULL) {
+            printf("%s --> ", current->node->name);
+            current = current->next;
+        }
+        printf("%s --> ", current->node->name);
+        puts("NULL");
+    }
+}
+
+//returns 1 if list is empty : 0 if not empty
+int isEmpty(void){
+    if (topHero == NULL){
+        puts("List is empty");
+        return 1;
+    }
+    return 0;
+}
+
+//read the key (aka legend) of the database, return it's info (currently just # of entities in database)
+//depending on the mode handle the read / write file operations so the calling functions can entirely ignore the database keys
+    //remember that if the variable args doesn't work just write it to assume that the output file is "temp.txt"
+int readKey(char *mode, FILE *input, ... ){
+    int entities = 0, testNum = 0;
+    char line[100];
+    char *token;
+    
+    fgets(line, 100, input);
+  
+    
+    if (!(strcmp(mode, "read only")) ) {
+        //read mode
+        //cut off \n
+        line[strlen(line) - 1] = '\0';
+        
+        //token through to find the number
+        token = strtok(line, " \t");
+        while (token != NULL) {
+            //find number
+            if ( !(strcmp(token, "0")) ) {
+                //you've found the number 0
+                entities = atoi(token);
+            }else if ( (testNum = atoi(token)) ){
+                entities = testNum;
+            }
+            token = strtok(NULL, " \t");
+        }
+    }else if (! (strcmp(mode, "read and write")) ){
+        //read and write mode
+        
+        //set up variable args
+        va_list ap;
+        va_start(ap, input);
+        
+        FILE *output = va_arg(ap, FILE*);
+        fprintf(output, "%s", line); //worked seemingly
+        fclose(output);
+        
+        //cut off \n
+        line[strlen(line) - 1] = '\0';
+        
+        
+        //token through to find the number
+        token = strtok(line, " \t");
+        while (token != NULL) {
+            //find number
+            if ( !(strcmp(token, "0")) ) {
+                //you've found the number 0
+                entities = atoi(token);
+            }else if ( (testNum = atoi(token)) ){
+                entities = testNum;
+            }
+            token = strtok(NULL, " \t");
+        }
+        
+        va_end(ap);
+    }
+
+
+    return entities;
+}
+

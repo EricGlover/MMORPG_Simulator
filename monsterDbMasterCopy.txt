@@ -1,0 +1,57 @@
+0
+Ferdinand Wittke
+Slug
+STATS 	health:	34
+	armor 	5
+	attack	2
+	crit	1
+	intelligence	13
+DESIRES		survival	1
+		greed		1
+		party love	1
+DROP RATES		sword		1
+			wands		5
+			filth		33
+			coins		4
+			?????		1
+INVENTORY	///NOT IMPLEMENTED///
+“Goo”
+//////////////////////////////////////////////////////////////////////
+0
+Enzo Mace
+Slug
+STATS 	health:	34
+	armor 	5
+	attack	2
+	crit	1
+	intelligence	13
+DESIRES		survival	1
+		greed		1
+		party love	1
+DROP RATES		sword		1
+			wands		5
+			filth		33
+			coins		4
+			?????		1
+INVENTORY	///NOT IMPLEMENTED///
+“Goo”
+//////////////////////////////////////////////////////////////////////
+0
+Claudie Fresnel
+Hydra
+STATS 	health:	34
+	armor 	0
+	attack	22
+	crit	5
+	intelligence	33
+DESIRES		survival	10
+		greed		8
+		party love	10
+DROP RATES		sword		1
+			wands		5
+			filth		1
+			coins		20
+			?????		3
+INVENTORY	///NOT IMPLEMENTED///
+Head
+//////////////////////////////////////////////////////////////////////
